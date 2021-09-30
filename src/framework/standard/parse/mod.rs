@@ -413,10 +413,13 @@ async fn handle_command<'a>(
             command,
         }),
         Err(err) => match group.options.default_command {
-            Some(command) => Ok(Invoke::Command {
-                group,
-                command,
-            }),
+            Some(command) => match check_discrepancy(ctx, msg, config, &command.options).await {
+                Ok(()) => Ok(Invoke::Command {
+                    group,
+                    command,
+                }),
+                Err(_) => Err(err),
+            },
             None => Err(err),
         },
     }
